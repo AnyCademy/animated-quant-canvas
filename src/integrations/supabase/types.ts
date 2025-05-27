@@ -33,6 +33,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_dashboard_data: {
+        Row: {
+          courses_completed: number | null
+          created_at: string
+          current_streak: number | null
+          id: string
+          last_activity_date: string | null
+          learning_goals: string[] | null
+          preferred_learning_schedule: string | null
+          total_courses_enrolled: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          courses_completed?: number | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_activity_date?: string | null
+          learning_goals?: string[] | null
+          preferred_learning_schedule?: string | null
+          total_courses_enrolled?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          courses_completed?: number | null
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_activity_date?: string | null
+          learning_goals?: string[] | null
+          preferred_learning_schedule?: string | null
+          total_courses_enrolled?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

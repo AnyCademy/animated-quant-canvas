@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, BarChart3 } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -36,6 +36,10 @@ const Navbar = () => {
     }
   };
 
+  const handleDashboardClick = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <nav 
       className={cn(
@@ -45,7 +49,12 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <span className="text-2xl font-bold text-gradient">AlgoQuant</span>
+          <span 
+            className="text-2xl font-bold text-gradient cursor-pointer" 
+            onClick={() => navigate('/')}
+          >
+            AlgoQuant
+          </span>
         </div>
         
         <div className="hidden md:flex space-x-8">
@@ -53,6 +62,15 @@ const Navbar = () => {
           <a href="#curriculum" className="text-quant-white hover:text-quant-teal transition-colors">Curriculum</a>
           <a href="#testimonials" className="text-quant-white hover:text-quant-teal transition-colors">Testimonials</a>
           <a href="#pricing" className="text-quant-white hover:text-quant-teal transition-colors">Pricing</a>
+          {user && (
+            <button 
+              onClick={handleDashboardClick}
+              className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Dashboard
+            </button>
+          )}
         </div>
         
         <div className="flex items-center space-x-4">
@@ -61,6 +79,16 @@ const Navbar = () => {
               <User className="w-4 h-4" />
               <span className="text-sm">{user.email}</span>
             </div>
+          )}
+          
+          {user && (
+            <Button 
+              variant="outline" 
+              className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+              onClick={handleDashboardClick}
+            >
+              <BarChart3 className="w-4 h-4" />
+            </Button>
           )}
           
           <Button 
