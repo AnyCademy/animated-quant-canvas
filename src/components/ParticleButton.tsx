@@ -19,13 +19,13 @@ const ParticleButton: React.FC<ParticleButtonProps> = ({
     const y = e.clientY - rect.top;
     
     for (let i = 0; i < 10; i++) {
-      createParticle(x, y, btn);
+      createParticle(x, y, btn, i);
     }
     
     if (onClick) onClick();
   }, [onClick]);
   
-  const createParticle = (x: number, y: number, btn: HTMLButtonElement) => {
+  const createParticle = (x: number, y: number, btn: HTMLButtonElement, i: number) => {
     const particle = document.createElement('span');
     particle.className = 'particle';
     btn.appendChild(particle);
