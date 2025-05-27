@@ -1,10 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
+import { LogOut, User } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +22,19 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const handleAuthClick = () => {
+    if (user) {
+      handleSignOut();
+    } else {
+      navigate('/auth');
+    }
+  };
 
   return (
     <nav 
@@ -37,9 +55,29 @@ const Navbar = () => {
           <a href="#pricing" className="text-quant-white hover:text-quant-teal transition-colors">Pricing</a>
         </div>
         
-        <Button variant="default" className="bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 button-glow">
-          Enroll Now
-        </Button>
+        <div className="flex items-center space-x-4">
+          {user && (
+            <div className="hidden md:flex items-center space-x-2 text-quant-white">
+              <User className="w-4 h-4" />
+              <span className="text-sm">{user.email}</span>
+            </div>
+          )}
+          
+          <Button 
+            variant="default" 
+            className="bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 button-glow"
+            onClick={handleAuthClick}
+          >
+            {user ? (
+              <>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </>
+            ) : (
+              'Enroll Now'
+            )}
+          </Button>
+        </div>
       </div>
     </nav>
   );

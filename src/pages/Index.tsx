@@ -10,8 +10,11 @@ import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import ScrollAnimation from '@/components/ScrollAnimation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { user } = useAuth();
+
   // Add preloader effect
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -40,6 +43,9 @@ const Index = () => {
             <div className="w-20 h-20 border-4 border-t-quant-teal border-quant-blue rounded-full animate-spin"></div>
           </div>
           <h2 className="text-3xl font-bold text-gradient">AlgoQuant</h2>
+          {user && (
+            <p className="text-quant-white mt-2">Welcome back, {user.email}!</p>
+          )}
         </div>
       </div>
       
