@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock } from 'lucide-react';
+import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock, Edit } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import VideoPlayer from '@/components/VideoPlayer';
 
@@ -241,18 +242,33 @@ const Course = () => {
     );
   }
 
+  const isInstructor = user?.id === course.instructor_id;
+
   return (
     <div className="min-h-screen bg-quant-blue-dark">
       <Navbar />
       <div className="container mx-auto px-4 py-24">
-        <Button 
-          onClick={() => navigate('/courses')} 
-          variant="ghost" 
-          className="mb-6 text-quant-white hover:text-quant-teal"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Courses
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button 
+            onClick={() => navigate('/courses')} 
+            variant="ghost" 
+            className="text-quant-white hover:text-quant-teal"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Courses
+          </Button>
+          
+          {isInstructor && (
+            <Button 
+              onClick={() => navigate(`/edit-course/${courseId}`)} 
+              variant="outline"
+              className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Course
+            </Button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -298,7 +314,7 @@ const Course = () => {
                 </div>
               </div>
 
-              {!enrollment && (
+              {!enrollment && !isInstructor && (
                 <div className="flex items-center gap-4">
                   <div className="text-3xl font-bold text-quant-teal">
                     {course.price > 0 ? formatPrice(course.price) : 'Free'}
@@ -310,6 +326,14 @@ const Course = () => {
                   >
                     {enrolling ? 'Processing...' : (course.price > 0 ? 'Enroll Now' : 'Start Learning')}
                   </Button>
+                </div>
+              )}
+
+              {isInstructor && (
+                <div className="p-4 bg-quant-teal/10 border border-quant-teal rounded-lg">
+                  <p className="text-quant-teal font-medium">
+                    You are the instructor of this course
+                  </p>
                 </div>
               )}
             </div>
@@ -332,17 +356,17 @@ const Course = () => {
                       <div 
                         key={video.id}
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                          enrollment 
+                          enrollment || isInstructor
                             ? 'hover:bg-quant-blue/40 text-quant-white' 
                             : 'text-quant-white/50'
                         } ${selectedVideo?.id === video.id ? 'bg-quant-teal/20 border border-quant-teal' : ''}`}
                         onClick={() => {
-                          if (enrollment) {
+                          if (enrollment || isInstructor) {
                             setSelectedVideo(video);
                           }
                         }}
                       >
-                        {enrollment ? (
+                        {enrollment || isInstructor ? (
                           <Play className="w-4 h-4 text-quant-teal" />
                         ) : (
                           <Lock className="w-4 h-4" />

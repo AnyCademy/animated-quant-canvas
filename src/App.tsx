@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import Course from "./pages/Course";
 import CreateCourse from "./pages/CreateCourse";
+import EditCourse from "./pages/EditCourse";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,11 @@ const App = () => (
             <Route path="/create-course" element={
               <ProtectedRoute>
                 <CreateCourse />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-course/:courseId" element={
+              <ProtectedRoute>
+                <EditCourse />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
