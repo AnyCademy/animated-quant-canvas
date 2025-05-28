@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,7 +104,7 @@ const Course = () => {
       setChapters(formattedChapters);
 
       // Auto-select first video if enrolled
-      if (enrollmentData && formattedChapters.length > 0 && formattedChapters[0].videos.length > 0) {
+      if (enrollment && formattedChapters.length > 0 && formattedChapters[0].videos.length > 0) {
         setSelectedVideo(formattedChapters[0].videos[0]);
       }
 
