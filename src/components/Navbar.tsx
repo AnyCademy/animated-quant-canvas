@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, BarChart3 } from 'lucide-react';
+import { LogOut, User, BarChart3, BookOpen } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -40,6 +40,10 @@ const Navbar = () => {
     navigate('/dashboard');
   };
 
+  const handleCoursesClick = () => {
+    navigate('/courses');
+  };
+
   return (
     <nav 
       className={cn(
@@ -63,13 +67,22 @@ const Navbar = () => {
           <a href="#testimonials" className="text-quant-white hover:text-quant-teal transition-colors">Testimonials</a>
           <a href="#pricing" className="text-quant-white hover:text-quant-teal transition-colors">Pricing</a>
           {user && (
-            <button 
-              onClick={handleDashboardClick}
-              className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
-            >
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
-            </button>
+            <>
+              <button 
+                onClick={handleCoursesClick}
+                className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+              >
+                <BookOpen className="w-4 h-4" />
+                Courses
+              </button>
+              <button 
+                onClick={handleDashboardClick}
+                className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Dashboard
+              </button>
+            </>
           )}
         </div>
         
@@ -82,13 +95,22 @@ const Navbar = () => {
           )}
           
           {user && (
-            <Button 
-              variant="outline" 
-              className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
-              onClick={handleDashboardClick}
-            >
-              <BarChart3 className="w-4 h-4" />
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+                onClick={handleCoursesClick}
+              >
+                <BookOpen className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+                onClick={handleDashboardClick}
+              >
+                <BarChart3 className="w-4 h-4" />
+              </Button>
+            </>
           )}
           
           <Button 
