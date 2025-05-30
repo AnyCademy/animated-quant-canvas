@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, BarChart3, BookOpen } from 'lucide-react';
+import { LogOut, User, BarChart3, BookOpen, LogIn, UserPlus } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -25,15 +25,11 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate('/');
   };
 
-  const handleAuthClick = () => {
-    if (user) {
-      handleSignOut();
-    } else {
-      navigate('/auth');
-    }
+  const handleLoginClick = () => {
+    navigate('/auth');
   };
 
   const handleDashboardClick = () => {
@@ -87,15 +83,13 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          {user && (
-            <div className="hidden md:flex items-center space-x-2 text-quant-white">
-              <User className="w-4 h-4" />
-              <span className="text-sm">{user.email}</span>
-            </div>
-          )}
-          
-          {user && (
+          {user ? (
             <>
+              <div className="hidden md:flex items-center space-x-2 text-quant-white">
+                <User className="w-4 h-4" />
+                <span className="text-sm">{user.email}</span>
+              </div>
+              
               <Button 
                 variant="outline" 
                 className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
@@ -110,23 +104,36 @@ const Navbar = () => {
               >
                 <BarChart3 className="w-4 h-4" />
               </Button>
-            </>
-          )}
-          
-          <Button 
-            variant="default" 
-            className="bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 button-glow"
-            onClick={handleAuthClick}
-          >
-            {user ? (
-              <>
+              
+              <Button 
+                variant="default" 
+                className="bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 button-glow"
+                onClick={handleSignOut}
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
-              </>
-            ) : (
-              'Enroll Now'
-            )}
-          </Button>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
+                onClick={handleLoginClick}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+              <Button 
+                variant="default" 
+                className="bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 button-glow"
+                onClick={handleLoginClick}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Register
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>
