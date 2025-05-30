@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,9 +16,16 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Add logging to see when this component mounts
+  useEffect(() => {
+    console.log('Auth page mounted, user:', user);
+  }, []);
+
   // Redirect to home if already authenticated
   useEffect(() => {
+    console.log('Auth page: checking user for redirect, user:', user);
     if (user) {
+      console.log('Auth page: user exists, redirecting to home');
       navigate('/');
     }
   }, [user, navigate]);
