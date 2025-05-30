@@ -13,7 +13,11 @@ import ScrollAnimation from '@/components/ScrollAnimation';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    console.log('Index page: user =', user, 'loading =', loading);
+  }, [user, loading]);
 
   // Add preloader effect
   useEffect(() => {
