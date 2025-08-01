@@ -13,6 +13,8 @@ import Courses from "./pages/Courses";
 import Course from "./pages/Course";
 import CreateCourse from "./pages/CreateCourse";
 import EditCourse from "./pages/EditCourse";
+import PaymentResult from "./pages/PaymentResult";
+import InstructorPaymentSettings from "./pages/InstructorPaymentSettings";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -66,6 +68,14 @@ const App = () => (
                 <EditCourse />
               </ProtectedRoute>
             } />
+            <Route path="/instructor/payment-settings" element={
+              <ProtectedRoute>
+                <InstructorPaymentSettings />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment/finish" element={<PaymentResult />} />
+            <Route path="/payment/error" element={<PaymentResult />} />
+            <Route path="/payment/pending" element={<PaymentResult />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

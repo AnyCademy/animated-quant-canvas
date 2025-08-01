@@ -16,7 +16,8 @@ import {
   Plus,
   Users,
   Eye,
-  DollarSign
+  DollarSign,
+  CreditCard
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
@@ -324,7 +325,7 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-quant-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Button
               onClick={() => navigate('/courses')}
               variant="outline"
@@ -344,6 +345,17 @@ const Dashboard = () => {
               <div className="text-center">
                 <Plus className="w-6 h-6 mx-auto mb-1" />
                 <span>Create Course</span>
+              </div>
+            </Button>
+
+            <Button
+              onClick={() => navigate('/instructor/payment-settings')}
+              variant="outline"
+              className="h-16 border-quant-teal text-quant-teal hover:bg-quant-teal/10"
+            >
+              <div className="text-center">
+                <CreditCard className="w-6 h-6 mx-auto mb-1" />
+                <span>Payment Settings</span>
               </div>
             </Button>
 

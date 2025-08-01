@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock, Edit } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import VideoPlayer from '@/components/VideoPlayer';
+import PaymentPage from '@/components/PaymentPage';
 
 interface Course {
   id: string;
@@ -52,6 +53,7 @@ const Course = () => {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -129,14 +131,14 @@ const Course = () => {
 
     if (!course) return;
 
-    setEnrolling(true);
-
-    try {
-      if (course.price > 0) {
-        // Handle paid course - integrate with Midtrans
-        await handlePayment();
-      } else {
-        // Handle free course - direct enrollment
+    if (course.price > 0) {
+      // Show payment page for paid courses
+      setShowPayment(true);
+    } else {
+      // Handle free course - direct enrollment
+      setEnrolling(true);
+      
+      try {
         const { error } = await supabase
           .from('course_enrollments')
           .insert({
@@ -152,47 +154,26 @@ const Course = () => {
         });
 
         await fetchCourseData();
+      } catch (error) {
+        console.error('Error enrolling:', error);
+        toast({
+          title: "Error",
+          description: "Failed to enroll in course",
+          variant: "destructive",
+        });
+      } finally {
+        setEnrolling(false);
       }
-    } catch (error) {
-      console.error('Error enrolling:', error);
-      toast({
-        title: "Error",
-        description: "Failed to enroll in course",
-        variant: "destructive",
-      });
-    } finally {
-      setEnrolling(false);
     }
   };
 
-  const handlePayment = async () => {
-    if (!course || !user) return;
+  const handlePaymentSuccess = async () => {
+    setShowPayment(false);
+    await fetchCourseData();
+  };
 
-    try {
-      // Create payment record
-      const { data: paymentData, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          course_id: course.id,
-          amount: course.price,
-          midtrans_order_id: `order-${course.id}-${user.id}-${Date.now()}`
-        })
-        .select()
-        .single();
-
-      if (paymentError) throw paymentError;
-
-      // Here you would integrate with Midtrans payment gateway
-      toast({
-        title: "Payment Integration",
-        description: "Midtrans payment integration will be implemented here",
-      });
-
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      throw error;
-    }
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
   };
 
   const formatPrice = (price: number) => {
@@ -243,6 +224,17 @@ const Course = () => {
   }
 
   const isInstructor = user?.id === course.instructor_id;
+
+  // Show payment page for paid courses
+  if (showPayment && course) {
+    return (
+      <PaymentPage
+        course={course}
+        onPaymentSuccess={handlePaymentSuccess}
+        onPaymentCancel={handlePaymentCancel}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-quant-blue-dark">
