@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { updatePaymentStatus } from '@/lib/midtrans';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const PaymentResult: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const [courseId, setCourseId] = useState<string | null>(null);
 
   const status = searchParams.get('status') || 'pending';
   const orderId = searchParams.get('order_id') || '';
@@ -40,6 +42,17 @@ const PaymentResult: React.FC = () => {
           }
 
           await updatePaymentStatus(orderId, paymentStatus, transactionId, paymentType);
+          
+          // Get course ID from payment record
+          const { data: paymentData } = await supabase
+            .from('payments')
+            .select('course_id')
+            .eq('midtrans_order_id', orderId)
+            .single();
+            
+          if (paymentData) {
+            setCourseId(paymentData.course_id);
+          }
         } catch (error) {
           console.error('Error updating payment status:', error);
         }
@@ -61,8 +74,11 @@ const PaymentResult: React.FC = () => {
           description: 'Your payment has been processed successfully. You now have access to the course.',
           buttonText: 'Go to Course',
           buttonAction: () => {
-            const courseId = orderId.split('-')[1];
-            navigate(`/course/${courseId}`);
+            if (courseId) {
+              navigate(`/course/${courseId}`);
+            } else {
+              navigate('/courses');
+            }
           }
         };
       case 'pending':
@@ -84,8 +100,11 @@ const PaymentResult: React.FC = () => {
           description: 'Your payment could not be processed. Please try again or contact support.',
           buttonText: 'Try Again',
           buttonAction: () => {
-            const courseId = orderId.split('-')[1];
-            navigate(`/course/${courseId}`);
+            if (courseId) {
+              navigate(`/course/${courseId}`);
+            } else {
+              navigate('/courses');
+            }
           }
         };
     }

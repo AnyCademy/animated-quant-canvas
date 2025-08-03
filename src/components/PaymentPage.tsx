@@ -15,7 +15,8 @@ import {
   getInstructorPaymentSettings,
   MidtransPaymentData,
   InstructorPaymentSettings
-} from '@/lib/midtrans-instructor';
+} from '@/lib/midtrans';
+import { logPaymentDiagnostics } from '@/utils/paymentDiagnostics';
 
 interface PaymentPageProps {
   course: {
@@ -59,20 +60,46 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
     setProcessing(true);
 
     try {
+      // Run diagnostic check first
+      await logPaymentDiagnostics(course.instructor_id);
+      
       // Get instructor's payment settings
       const instructorSettings = await getInstructorPaymentSettings(course.instructor_id);
       
       if (!instructorSettings) {
         toast({
           title: "Payment Unavailable",
-          description: "This instructor hasn't configured payment settings yet",
+          description: "This instructor hasn't configured their payment settings yet or the payment gateway is not active. Please contact the instructor.",
           variant: "destructive",
         });
+        setProcessing(false);
         return;
       }
 
+      // Additional validation for payment settings
+      if (!instructorSettings.midtrans_client_key || !instructorSettings.midtrans_server_key) {
+        toast({
+          title: "Payment Configuration Error",
+          description: "The instructor's payment configuration is incomplete. Please contact the instructor.",
+          variant: "destructive",
+        });
+        setProcessing(false);
+        return;
+      }
+
+      console.log('Instructor payment settings found:', {
+        hasClientKey: !!instructorSettings.midtrans_client_key,
+        hasServerKey: !!instructorSettings.midtrans_server_key,
+        isProduction: instructorSettings.is_production,
+        isActive: instructorSettings.is_active
+      });
+
       // Create payment record in database
-      const orderId = `order-${course.id}-${user.id}-${Date.now()}`;
+      // Generate shorter order ID to comply with Midtrans limits (max 50 chars)
+      const timestamp = Date.now().toString();
+      const courseIdShort = course.id.substring(0, 8);
+      const userIdShort = user.id.substring(0, 8);
+      const orderId = `ord-${courseIdShort}-${userIdShort}-${timestamp}`;
       
       const { data: paymentRecord, error: paymentError } = await supabase
         .from('payments')

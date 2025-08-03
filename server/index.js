@@ -11,7 +11,7 @@ const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8080:~/Project/Anycademy/animated-quant-canvas/server$ ', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }));
 app.use(express.json());
@@ -149,6 +149,90 @@ app.post('/api/test-midtrans-connection', async (req, res) => {
     return res.status(500).json({
       status: 'error',
       message: 'Failed to test connection. Please check your network and try again.',
+      error: error.message
+    });
+  }
+});
+
+// Create Midtrans Snap payment token
+app.post('/api/create-payment-token', async (req, res) => {
+  try {
+    const { paymentData, instructorSettings } = req.body;
+
+    if (!paymentData || !instructorSettings) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Payment data and instructor settings are required'
+      });
+    }
+
+    // Validate instructor settings
+    if (!instructorSettings.midtrans_server_key || !instructorSettings.midtrans_client_key) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing Midtrans credentials'
+      });
+    }
+
+    // Determine Midtrans API URL
+    const baseUrl = instructorSettings.is_production 
+      ? 'https://app.midtrans.com/snap/v1/transactions' 
+      : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+
+    // Prepare payment payload
+    const payload = {
+      transaction_details: {
+        order_id: paymentData.orderId,
+        gross_amount: paymentData.amount,
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: paymentData.customerDetails,
+      item_details: paymentData.itemDetails,
+      callbacks: {
+        finish: `${req.headers.origin || 'http://localhost:5173'}/payment/finish`,
+        error: `${req.headers.origin || 'http://localhost:5173'}/payment/error`,
+        pending: `${req.headers.origin || 'http://localhost:5173'}/payment/pending`,
+      },
+    };
+
+    console.log('Creating payment token for order:', paymentData.orderId);
+
+    // Call Midtrans API
+    const response = await fetch(baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${Buffer.from(instructorSettings.midtrans_server_key + ':').toString('base64')}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Midtrans API error:', errorData);
+      return res.status(response.status).json({
+        status: 'error',
+        message: `Midtrans API Error: ${errorData.error_messages?.[0] || 'Unknown error'}`,
+        details: errorData
+      });
+    }
+
+    const data = await response.json();
+    console.log('Payment token created successfully');
+
+    return res.json({
+      status: 'success',
+      token: data.token,
+      redirect_url: data.redirect_url
+    });
+
+  } catch (error) {
+    console.error('Error creating payment token:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to create payment token',
       error: error.message
     });
   }

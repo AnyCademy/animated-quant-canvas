@@ -34,6 +34,51 @@ export interface InstructorPaymentSettings {
   is_active: boolean;
 }
 
+// Diagnostic function to log payment setup issues
+export const logPaymentDiagnostics = async (instructorId: string): Promise<void> => {
+  try {
+    console.log('=== Payment Diagnostics for Instructor:', instructorId, '===');
+    
+    const { data, error } = await supabase
+      .from('instructor_payment_settings' as any)
+      .select('*')
+      .eq('instructor_id', instructorId);
+
+    if (error) {
+      console.error('❌ Database error:', error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      console.error('❌ No payment settings found for instructor');
+      return;
+    }
+
+    const settings = data[0] as any;
+    console.log('✅ Payment settings found');
+    console.log('  - Has Client Key:', !!settings.midtrans_client_key);
+    console.log('  - Has Server Key:', !!settings.midtrans_server_key);
+    console.log('  - Is Production:', settings.is_production);
+    console.log('  - Is Active:', settings.is_active);
+    
+    if (!settings.is_active) {
+      console.warn('⚠️ Payment gateway is NOT ACTIVE');
+    }
+    
+    if (!settings.midtrans_client_key) {
+      console.warn('⚠️ Missing client key');
+    }
+    
+    if (!settings.midtrans_server_key) {
+      console.warn('⚠️ Missing server key');
+    }
+    
+    console.log('=== End Diagnostics ===');
+  } catch (error) {
+    console.error('❌ Diagnostic error:', error);
+  }
+};
+
 // Get instructor's payment settings (simplified approach)
 export const getInstructorPaymentSettings = async (instructorId: string): Promise<InstructorPaymentSettings | null> => {
   try {
@@ -45,15 +90,57 @@ export const getInstructorPaymentSettings = async (instructorId: string): Promis
       .eq('is_active', true)
       .single();
 
-    if (error || !data) {
+    if (error) {
+      console.error('Error fetching instructor payment settings:', error);
+      
+      // If no active settings found, check if there are any settings at all
+      const { data: allData } = await supabase
+        .from('instructor_payment_settings' as any)
+        .select('*')
+        .eq('instructor_id', instructorId);
+        
+      if (allData && allData.length > 0) {
+        console.log('Found payment settings but they are not active:', allData[0]);
+      } else {
+        console.log('No payment settings found for instructor:', instructorId);
+      }
+      
       return null;
     }
 
+    if (!data) {
+      console.log('No active payment settings found for instructor:', instructorId);
+      return null;
+    }
+
+    const settings = data as any;
+
+    // Validate that required credentials are present
+    if (!settings.midtrans_client_key || !settings.midtrans_server_key) {
+      console.log('Missing Midtrans credentials for instructor:', instructorId);
+      return null;
+    }
+
+    // Validate key formats based on environment
+    const expectedClientPrefix = settings.is_production ? 'Mid-client-' : 'SB-Mid-client-';
+    const expectedServerPrefix = settings.is_production ? 'Mid-server-' : 'SB-Mid-server-';
+    
+    if (!settings.midtrans_client_key.startsWith(expectedClientPrefix)) {
+      console.error('Invalid client key format for instructor:', instructorId, 'Expected prefix:', expectedClientPrefix);
+      return null;
+    }
+    
+    if (!settings.midtrans_server_key.startsWith(expectedServerPrefix)) {
+      console.error('Invalid server key format for instructor:', instructorId, 'Expected prefix:', expectedServerPrefix);
+      return null;
+    }
+
+    console.log('✅ Valid payment settings found for instructor:', instructorId);
     return {
-      midtrans_client_key: (data as any).midtrans_client_key,
-      midtrans_server_key: (data as any).midtrans_server_key,
-      is_production: (data as any).is_production,
-      is_active: (data as any).is_active,
+      midtrans_client_key: settings.midtrans_client_key,
+      midtrans_server_key: settings.midtrans_server_key,
+      is_production: settings.is_production,
+      is_active: settings.is_active,
     };
   } catch (error) {
     console.error('Error fetching instructor payment settings:', error);
@@ -61,7 +148,7 @@ export const getInstructorPaymentSettings = async (instructorId: string): Promis
   }
 };
 
-// Create Snap payment token with instructor-specific credentials
+// Create Snap payment token with instructor-specific credentials via backend
 export const createSnapToken = async (
   paymentData: MidtransPaymentData, 
   instructorSettings?: InstructorPaymentSettings
@@ -73,43 +160,30 @@ export const createSnapToken = async (
     is_active: true,
   };
 
-  const baseUrl = settings.is_production 
-    ? 'https://app.midtrans.com/snap/v1/transactions' 
-    : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
-
-  const payload = {
-    transaction_details: {
-      order_id: paymentData.orderId,
-      gross_amount: paymentData.amount,
-    },
-    credit_card: {
-      secure: true,
-    },
-    customer_details: paymentData.customerDetails,
-    item_details: paymentData.itemDetails,
-    callbacks: {
-      finish: `${window.location.origin}/payment/finish`,
-      error: `${window.location.origin}/payment/error`,
-      pending: `${window.location.origin}/payment/pending`,
-    },
-  };
-
   try {
-    const response = await fetch(baseUrl, {
+    // Call our backend API instead of Midtrans directly to avoid CORS issues
+    const response = await fetch('http://localhost:3001/api/create-payment-token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${btoa(settings.midtrans_server_key + ':')}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        paymentData,
+        instructorSettings: settings
+      }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Midtrans API Error: ${errorData.error_messages?.[0] || 'Unknown error'}`);
+      throw new Error(`Payment Token Error: ${errorData.message || 'Unknown error'}`);
     }
 
-    const data: MidtransSnapResponse = await response.json();
+    const data = await response.json();
+    
+    if (data.status !== 'success') {
+      throw new Error(`Payment Token Error: ${data.message || 'Unknown error'}`);
+    }
+
     return data.token;
   } catch (error) {
     console.error('Error creating Snap token:', error);
