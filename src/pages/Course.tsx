@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock, Edit } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import VideoPlayer from '@/components/VideoPlayer';
-import PaymentPage from '@/components/PaymentPage';
+
+// Lazy load heavy components
+const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
+const PaymentPage = lazy(() => import('@/components/PaymentPage'));
 
 interface Course {
   id: string;
@@ -228,11 +230,20 @@ const Course = () => {
   // Show payment page for paid courses
   if (showPayment && course) {
     return (
-      <PaymentPage
-        course={course}
-        onPaymentSuccess={handlePaymentSuccess}
-        onPaymentCancel={handlePaymentCancel}
-      />
+      <Suspense fallback={
+        <div className="min-h-screen bg-quant-blue-dark flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-20 h-20 border-4 border-t-quant-teal border-quant-blue rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-quant-white">Loading payment page...</p>
+          </div>
+        </div>
+      }>
+        <PaymentPage
+          course={course}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentCancel={handlePaymentCancel}
+        />
+      </Suspense>
     );
   }
 
@@ -266,13 +277,22 @@ const Course = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {enrollment && selectedVideo ? (
-              <VideoPlayer 
-                video={selectedVideo}
-                onVideoEnd={() => {
-                  // Handle video completion
-                  console.log('Video completed');
-                }}
-              />
+              <Suspense fallback={
+                <div className="aspect-video bg-quant-blue rounded-lg mb-6 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-t-quant-teal border-quant-blue rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-quant-white">Loading video player...</p>
+                  </div>
+                </div>
+              }>
+                <VideoPlayer 
+                  video={selectedVideo}
+                  onVideoEnd={() => {
+                    // Handle video completion
+                    console.log('Video completed');
+                  }}
+                />
+              </Suspense>
             ) : (
               <div className="aspect-video bg-quant-blue rounded-lg mb-6 flex items-center justify-center">
                 {course.thumbnail_url ? (
