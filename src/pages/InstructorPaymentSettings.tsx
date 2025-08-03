@@ -89,42 +89,66 @@ const InstructorPaymentSettings = () => {
     setTestingConnection(true);
 
     try {
-      const baseUrl = settings.is_production 
-        ? 'https://api.midtrans.com/v2' 
-        : 'https://api.sandbox.midtrans.com/v2';
-
-      // Test with a dummy order ID to check authentication
-      const response = await fetch(`${baseUrl}/test-order-123/status`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${btoa(settings.midtrans_server_key + ':')}`,
-        },
+      console.log('Calling Node.js API with:', {
+        serverKey: settings.midtrans_server_key.substring(0, 20) + '...',
+        isProduction: settings.is_production
       });
 
-      // If we get a 404, it means authentication worked (order doesn't exist)
-      // If we get a 401, it means authentication failed
-      if (response.status === 404) {
+      // Call the Node.js API to test the connection
+      const response = await fetch('http://localhost:3001/api/test-midtrans-connection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          serverKey: settings.midtrans_server_key,
+          isProduction: settings.is_production,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Node.js API response:', { status: response.status, data });
+
+      if (!response.ok) {
+        console.error('API returned non-ok status:', response.status);
         toast({
-          title: "Connection Successful!",
-          description: "Your Midtrans credentials are valid",
-        });
-      } else if (response.status === 401) {
-        toast({
-          title: "Authentication Failed",
-          description: "Invalid Midtrans server key",
+          title: "Connection Test Failed",
+          description: data.message || `Server returned status ${response.status}`,
           variant: "destructive",
         });
-      } else {
+        return;
+      }
+
+      // Handle the response based on status
+      if (data?.status === 'success') {
+        toast({
+          title: "Connection Successful!",
+          description: data.message,
+        });
+      } else if (data?.status === 'error') {
+        toast({
+          title: "Authentication Failed",
+          description: data.message,
+          variant: "destructive",
+        });
+      } else if (data?.status === 'warning') {
         toast({
           title: "Connection Test Complete",
-          description: "Please verify your credentials in the Midtrans dashboard",
+          description: data.message,
+        });
+      } else {
+        console.error('Unexpected response format:', data);
+        toast({
+          title: "Unexpected Response",
+          description: `Received: ${JSON.stringify(data)}`,
+          variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error testing connection:', error);
       toast({
         title: "Connection Failed",
-        description: "Unable to connect to Midtrans. Please check your credentials.",
+        description: `Error: ${error.message || 'Unable to connect to server. Make sure the Node.js server is running on port 3001.'}`,
         variant: "destructive",
       });
     } finally {
