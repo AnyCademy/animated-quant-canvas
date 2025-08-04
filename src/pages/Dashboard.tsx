@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +31,9 @@ import {
   DollarSign,
   CreditCard,
   Trash2,
-  Edit
+  Edit,
+  Search,
+  X
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
@@ -60,6 +63,8 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [createdCourses, setCreatedCourses] = useState<Course[]>([]);
+  const [filteredCreatedCourses, setFilteredCreatedCourses] = useState<Course[]>([]);
+  const [createdCoursesSearchTerm, setCreatedCoursesSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -69,6 +74,19 @@ const Dashboard = () => {
       fetchDashboardData();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Filter created courses based on search term
+    if (createdCoursesSearchTerm.trim() === '') {
+      setFilteredCreatedCourses(createdCourses);
+    } else {
+      const filtered = createdCourses.filter(course =>
+        course.title.toLowerCase().includes(createdCoursesSearchTerm.toLowerCase()) ||
+        course.description.toLowerCase().includes(createdCoursesSearchTerm.toLowerCase())
+      );
+      setFilteredCreatedCourses(filtered);
+    }
+  }, [createdCourses, createdCoursesSearchTerm]);
 
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -105,6 +123,7 @@ const Dashboard = () => {
 
       if (coursesError) throw coursesError;
       setCreatedCourses(coursesData || []);
+      setFilteredCreatedCourses(coursesData || []);
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -130,6 +149,7 @@ const Dashboard = () => {
 
       // Update the local state
       setCreatedCourses(prev => prev.filter(course => course.id !== courseId));
+      setFilteredCreatedCourses(prev => prev.filter(course => course.id !== courseId));
       
       toast({
         title: "Success",
@@ -150,6 +170,10 @@ const Dashboard = () => {
       style: 'currency',
       currency: 'IDR',
     }).format(price);
+  };
+
+  const clearCreatedCoursesSearch = () => {
+    setCreatedCoursesSearchTerm('');
   };
 
   if (loading) {
@@ -318,77 +342,123 @@ const Dashboard = () => {
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              {createdCourses.length > 0 ? (
-                createdCourses.slice(0, 3).map((course) => (
-                  <div
-                    key={course.id}
-                    className="flex items-center justify-between p-3 bg-quant-blue/10 rounded-lg hover:bg-quant-blue/20 transition-colors"
-                  >
-                    <div 
-                      className="flex-1 cursor-pointer"
-                      onClick={() => navigate(`/course/${course.id}`)}
+              {createdCourses.length > 0 && (
+                <div className="mb-4">
+                  {/* Search Bar for Created Courses */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-quant-white/60 w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder="Search your courses..."
+                      value={createdCoursesSearchTerm}
+                      onChange={(e) => setCreatedCoursesSearchTerm(e.target.value)}
+                      className="pl-10 pr-10 bg-quant-blue/20 border-quant-blue text-quant-white placeholder-quant-white/60 focus:border-quant-teal"
+                    />
+                    {createdCoursesSearchTerm && (
+                      <Button
+                        onClick={clearCreatedCoursesSearch}
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 text-quant-white/60 hover:text-quant-white h-8 w-8 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {createdCoursesSearchTerm && (
+                    <p className="text-quant-white/60 text-sm mt-2">
+                      {filteredCreatedCourses.length} course{filteredCreatedCourses.length !== 1 ? 's' : ''} found
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {filteredCreatedCourses.length > 0 ? (
+                <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
+                  {filteredCreatedCourses.map((course) => (
+                    <div
+                      key={course.id}
+                      className="flex items-center justify-between p-3 bg-quant-blue/10 rounded-lg hover:bg-quant-blue/20 transition-colors"
                     >
-                      <h4 className="font-medium text-quant-white">{course.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant={course.status === 'published' ? 'default' : 'secondary'}
-                          className="text-xs"
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => navigate(`/course/${course.id}`)}
+                      >
+                        <h4 className="font-medium text-quant-white">{course.title}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge 
+                            variant={course.status === 'published' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {course.status}
+                          </Badge>
+                          <span className="text-sm text-quant-white/60">
+                            {formatPrice(course.price)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/edit-course/${course.id}`);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
                         >
-                          {course.status}
-                        </Badge>
-                        <span className="text-sm text-quant-white/60">
-                          {formatPrice(course.price)}
-                        </span>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              onClick={(e) => e.stopPropagation()}
+                              variant="outline"
+                              size="sm"
+                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-quant-blue-dark border-quant-blue">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-quant-white">
+                                Delete Course
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-quant-white/70">
+                                Are you sure you want to delete "{course.title}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-quant-blue text-quant-white hover:bg-quant-blue/20">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteCourse(course.id)}
+                                className="bg-red-500 text-white hover:bg-red-600"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/edit-course/${course.id}`);
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            onClick={(e) => e.stopPropagation()}
-                            variant="outline"
-                            size="sm"
-                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-quant-blue-dark border-quant-blue">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-quant-white">
-                              Delete Course
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className="text-quant-white/70">
-                              Are you sure you want to delete "{course.title}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="border-quant-blue text-quant-white hover:bg-quant-blue/20">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteCourse(course.id)}
-                              className="bg-red-500 text-white hover:bg-red-600"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
+              ) : createdCourses.length > 0 && createdCoursesSearchTerm ? (
+                <div className="text-center py-8">
+                  <Search className="w-12 h-12 text-quant-white/40 mx-auto mb-4" />
+                  <p className="text-quant-white/60 text-lg mb-2">No courses found matching "{createdCoursesSearchTerm}"</p>
+                  <p className="text-quant-white/40">Try adjusting your search terms</p>
+                  <Button
+                    onClick={clearCreatedCoursesSearch}
+                    variant="outline"
+                    className="mt-4 border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
+                  >
+                    Clear Search
+                  </Button>
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <Plus className="w-12 h-12 text-quant-white/40 mx-auto mb-4" />
