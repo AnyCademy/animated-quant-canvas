@@ -17,41 +17,41 @@ const testimonials: Testimonial[] = [
   {
     id: 1,
     name: "Sarah Johnson",
-    role: "Senior Trader",
-    company: "Quantum Capital",
-    content: "AlgoQuant transformed my approach to trading. The strategies I learned allowed me to increase my portfolio returns by over 30% in just six months.",
+    role: "Software Developer",
+    company: "Tech Innovations",
+    content: "AnyCademy helped me transition from marketing to tech. The programming courses were comprehensive and the instructors were incredibly supportive throughout my journey.",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     id: 2,
     name: "Michael Chen",
-    role: "Quant Developer",
-    company: "FinTech Solutions",
-    content: "The algorithm development section alone was worth the investment. I've implemented three strategies from the course into our firm's trading systems with exceptional results.",
+    role: "UX Designer",
+    company: "Creative Studios",
+    content: "The design courses on AnyCademy are world-class. I learned practical skills that I immediately applied to my work, resulting in a promotion within three months.",
     image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     id: 3,
     name: "David Rodriguez",
-    role: "Independent Trader",
-    company: "Self-employed",
-    content: "As a former manual trader, I was skeptical about algorithmic approaches. This course changed everything for me. My strategies are now fully automated and much more profitable.",
+    role: "Small Business Owner",
+    company: "Rodriguez Consulting",
+    content: "As an entrepreneur, I needed to learn marketing and business skills quickly. AnyCademy's business courses helped me grow my revenue by 150% in one year.",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     id: 4,
     name: "Emma Thompson",
-    role: "Portfolio Manager",
-    company: "Alpha Investments",
-    content: "The risk management techniques taught in this course have been invaluable. I've been able to maintain returns while significantly reducing volatility in our fund.",
+    role: "Data Analyst",
+    company: "Analytics Corp",
+    content: "The data science program exceeded my expectations. The hands-on projects and real-world applications gave me the confidence to excel in my new career.",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80"
   },
   {
     id: 5,
     name: "Raj Patel",
-    role: "Data Scientist",
-    company: "Market Analytics",
-    content: "The combination of financial theory and practical coding examples made complex concepts accessible. I've applied these methods to develop entirely new trading signals.",
+    role: "Digital Marketer",
+    company: "Growth Agency",
+    content: "The marketing courses provided actionable strategies that I implemented immediately. My campaign performance improved dramatically, and I now lead my team's digital initiatives.",
     image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80"
   }
 ];
@@ -98,7 +98,7 @@ const TestimonialsSection = () => {
             Success <span className="text-gradient">Stories</span>
           </h2>
           <p className="text-xl text-quant-gray animate-on-scroll stagger-1">
-            Hear from traders and quantitative analysts who transformed their results with our course.
+            Hear from learners who transformed their careers and achieved their goals with AnyCademy.
           </p>
         </div>
         

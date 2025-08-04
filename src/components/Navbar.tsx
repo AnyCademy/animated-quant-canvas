@@ -51,7 +51,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-3">
           <img 
             src="/icon.svg" 
-            alt="AlgoQuant Logo" 
+            alt="AnyCademy Logo" 
             className="w-8 h-8 cursor-pointer"
             onClick={() => navigate('/')}
           />
@@ -59,14 +59,14 @@ const Navbar = () => {
             className="text-2xl font-bold text-gradient cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            AlgoQuant
+            AnyCademy
           </span>
         </div>
         
         <div className="hidden md:flex space-x-8">
           <a href="#features" className="text-quant-white hover:text-quant-teal transition-colors">Features</a>
-          <a href="#curriculum" className="text-quant-white hover:text-quant-teal transition-colors">Curriculum</a>
-          <a href="#testimonials" className="text-quant-white hover:text-quant-teal transition-colors">Testimonials</a>
+          <a href="#curriculum" className="text-quant-white hover:text-quant-teal transition-colors">Categories</a>
+          <a href="#testimonials" className="text-quant-white hover:text-quant-teal transition-colors">Reviews</a>
           <a href="#pricing" className="text-quant-white hover:text-quant-teal transition-colors">Pricing</a>
           {user && (
             <>

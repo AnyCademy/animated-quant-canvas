@@ -92,62 +92,63 @@ const PricingSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 animate-on-scroll">
-            Investment <span className="text-gradient">Plans</span>
+            Learning <span className="text-gradient">Plans</span>
           </h2>
           <p className="text-xl text-quant-gray animate-on-scroll stagger-1">
-            Choose the plan that best fits your trading goals and experience level.
+            Choose the plan that best fits your learning goals and budget.
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <PricingTier
-            name="Starter"
-            price="$499"
-            description="Perfect for beginners entering the world of algorithmic trading"
+            name="Basic"
+            price="$19/mo"
+            description="Perfect for beginners starting their learning journey"
             features={[
-              "Core trading algorithms",
-              "Basic data analysis tools",
-              "30+ hours of video content",
-              "Community forum access",
-              "3 months of support"
+              "Access to 1,000+ courses",
+              "Mobile and web access",
+              "Basic certificates",
+              "Community support",
+              "Monthly live sessions"
             ]}
             buttonText="Get Started"
             delay={100}
           />
           
           <PricingTier
-            name="Professional"
-            price="$999"
-            description="Comprehensive training for serious quantitative traders"
+            name="Premium"
+            price="$39/mo"
+            description="Comprehensive learning for serious skill builders"
             features={[
-              "All Starter features",
-              "Advanced algorithm library",
-              "60+ hours of video content",
-              "Live trading simulations",
-              "1-on-1 strategy review",
-              "6 months of support",
-              "Private community access"
+              "All Basic features",
+              "Access to 10,000+ courses",
+              "Verified certificates",
+              "Offline downloads",
+              "Priority support",
+              "1-on-1 mentoring sessions",
+              "Career guidance",
+              "Practice exercises"
             ]}
             popular={true}
-            buttonText="Enroll Now"
+            buttonText="Upgrade Now"
             delay={200}
           />
           
           <PricingTier
-            name="Enterprise"
-            price="$1,999"
-            description="Elite package for professional trading firms and institutions"
+            name="Business"
+            price="$99/mo"
+            description="Elite package for teams and organizations"
             features={[
-              "All Professional features",
-              "100+ hours of video content",
-              "Custom strategy development",
-              "Portfolio optimization tools",
-              "High-frequency trading modules",
-              "Lifetime support",
-              "Code review sessions",
-              "Team licenses available"
+              "All Premium features",
+              "Unlimited team members",
+              "Custom learning paths",
+              "Advanced analytics",
+              "Dedicated account manager",
+              "Custom content creation",
+              "Integration support",
+              "Priority customer success"
             ]}
-            buttonText="Contact Us"
+            buttonText="Contact Sales"
             delay={300}
           />
         </div>
@@ -159,7 +160,7 @@ const PricingSection = () => {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
               </svg>
-              30-Day Money-Back Guarantee
+              7-Day Free Trial • Cancel Anytime
             </p>
           </div>
         </div>

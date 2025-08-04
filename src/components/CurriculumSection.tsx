@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChartBar, ChartLine, ChartPie, TrendingUp, Calculator } from 'lucide-react';
+import { Code, Palette, Briefcase, Heart, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ModuleProps {
@@ -78,67 +78,67 @@ const CurriculumSection = () => {
   const modules = [
     {
       number: "01",
-      title: "Foundations of Quantitative Trading",
-      description: "Master the core principles and mathematics that power algorithmic trading",
-      icon: <Calculator className="w-5 h-5" />,
+      title: "Technology & Programming",
+      description: "Master the skills that power the digital world",
+      icon: <Code className="w-5 h-5" />,
       lessons: [
-        "Introduction to Quantitative Analysis",
-        "Statistical Methods for Trading",
-        "Time Series Analysis Fundamentals",
-        "Probability Theory in Finance",
-        "Linear Algebra for Trading Algorithms"
+        "Web Development (Frontend & Backend)",
+        "Mobile App Development",
+        "Data Science & Machine Learning",
+        "Cloud Computing & DevOps",
+        "Cybersecurity Fundamentals"
       ]
     },
     {
       number: "02",
-      title: "Market Data Analysis",
-      description: "Learn to collect, clean, and analyze financial market data",
-      icon: <ChartBar className="w-5 h-5" />,
+      title: "Design & Creative",
+      description: "Unleash your creativity with professional design skills",
+      icon: <Palette className="w-5 h-5" />,
       lessons: [
-        "Data Collection and API Integration",
-        "Data Cleaning and Preprocessing",
-        "Feature Engineering for Financial Data",
-        "Exploratory Data Analysis",
-        "Visualization Techniques for Market Data"
+        "UI/UX Design Principles",
+        "Graphic Design & Branding",
+        "Video Production & Editing",
+        "Photography & Visual Arts",
+        "Motion Graphics & Animation"
       ]
     },
     {
       number: "03",
-      title: "Strategy Development",
-      description: "Design and implement profitable trading strategies",
-      icon: <ChartLine className="w-5 h-5" />,
+      title: "Business & Marketing",
+      description: "Build and grow successful businesses",
+      icon: <Briefcase className="w-5 h-5" />,
       lessons: [
-        "Momentum Trading Strategies",
-        "Mean Reversion Models",
-        "Statistical Arbitrage",
-        "Machine Learning for Strategy Development",
-        "Natural Language Processing for Market Sentiment"
+        "Digital Marketing Strategies",
+        "Entrepreneurship & Startup Building",
+        "Project Management",
+        "Sales & Customer Success",
+        "Financial Planning & Analysis"
       ]
     },
     {
       number: "04",
-      title: "Risk Management & Optimization",
-      description: "Protect your capital and optimize portfolio performance",
-      icon: <ChartPie className="w-5 h-5" />,
+      title: "Health & Lifestyle",
+      description: "Improve your well-being and personal growth",
+      icon: <Heart className="w-5 h-5" />,
       lessons: [
-        "Portfolio Optimization Techniques",
-        "Risk Metrics and Measurement",
-        "Monte Carlo Simulations",
-        "Value at Risk (VaR) Models",
-        "Position Sizing and Capital Allocation"
+        "Fitness & Nutrition Coaching",
+        "Mental Health & Mindfulness",
+        "Personal Development",
+        "Cooking & Culinary Arts",
+        "Languages & Communication"
       ]
     },
     {
       number: "05",
-      title: "Implementation & Execution",
-      description: "Build and deploy your trading systems in live markets",
-      icon: <TrendingUp className="w-5 h-5" />,
+      title: "Skills & Crafts",
+      description: "Learn practical skills for work and life",
+      icon: <Wrench className="w-5 h-5" />,
       lessons: [
-        "Trading Platform Architecture",
-        "Backtesting Frameworks",
-        "Order Execution Algorithms",
-        "Latency Optimization",
-        "Live Trading System Deployment"
+        "Home Improvement & DIY",
+        "Music & Audio Production",
+        "Writing & Content Creation",
+        "Teaching & Education",
+        "Arts & Crafts"
       ]
     }
   ];
@@ -152,10 +152,10 @@ const CurriculumSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 animate-on-scroll">
-            Comprehensive <span className="text-gradient">Curriculum</span>
+            Explore Course <span className="text-gradient">Categories</span>
           </h2>
           <p className="text-xl text-quant-gray animate-on-scroll stagger-1">
-            From mathematical foundations to live trading strategies, our curriculum covers every aspect of quantitative trading.
+            Discover thousands of courses across diverse categories, taught by industry experts and designed to help you achieve your goals.
           </p>
         </div>
         

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChartLine } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
 const CTASection = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -93,24 +93,24 @@ const CTASection = () => {
         <div className="relative z-20 py-16 px-4 sm:px-8 md:px-16 max-w-4xl mx-auto text-center">
           <div className="inline-block p-2 bg-quant-blue/50 rounded-full mb-8 animate-float">
             <div className="w-16 h-16 rounded-full bg-quant-blue flex items-center justify-center">
-              <ChartLine className="w-8 h-8 text-quant-teal" />
+              <GraduationCap className="w-8 h-8 text-quant-teal" />
             </div>
           </div>
           
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 animate-on-scroll">
-            Ready to <span className="text-gradient">Transform</span> Your Trading?
+            Ready to <span className="text-gradient">Start Learning</span> Today?
           </h2>
           
           <p className="text-xl text-quant-white/90 mb-10 max-w-2xl mx-auto animate-on-scroll stagger-1">
-            Join thousands of successful traders who have mastered the art and science of algorithmic trading with AlgoQuant.
+            Join millions of learners worldwide who are advancing their careers and achieving their goals with AnyCademy.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll stagger-2">
             <Button className="text-lg px-8 py-6 bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/90 button-glow">
-              Enroll Now
+              Start Learning
             </Button>
             <Button variant="outline" className="text-lg px-8 py-6 border-quant-teal text-quant-teal hover:bg-quant-teal/10">
-              Download Syllabus
+              Become Instructor
             </Button>
           </div>
         </div>

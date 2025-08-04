@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { TrendingUp, ChartLine } from 'lucide-react';
+import { BookOpen, Users } from 'lucide-react';
 
 const HeroSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -116,8 +116,8 @@ const HeroSection = () => {
     const percentElem = document.getElementById('percent-return');
     const tradersElem = document.getElementById('traders-count');
     
-    if (percentElem) animateNumber(percentElem, 237, 3000);
-    if (tradersElem) animateNumber(tradersElem, 15000, 3000);
+    if (percentElem) animateNumber(percentElem, 50000, 3000);
+    if (tradersElem) animateNumber(tradersElem, 2500, 3000);
   }, []);
 
   return (
@@ -133,41 +133,41 @@ const HeroSection = () => {
             <div className="animate-slide-down opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
               <div className="inline-block px-4 py-1 mb-4 bg-quant-blue rounded-full border border-quant-teal/30">
                 <span className="text-quant-teal text-sm font-medium flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Master Algorithmic Trading
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Learn Any Skill, Anytime
                 </span>
               </div>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-slide-down opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-              Unleash the Power of <span className="text-gradient">Quantitative Trading</span>
+              Your Gateway to <span className="text-gradient">Unlimited Learning</span>
             </h1>
             
             <p className="text-xl text-quant-gray mb-8 max-w-xl animate-slide-down opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
-              Master algorithmic strategies, data analysis, and market prediction with our comprehensive quantitative trading course.
+              Discover thousands of courses from expert instructors. Master new skills, advance your career, and unlock your potential with AnyCademy.
             </p>
             
             <div className="flex flex-wrap gap-4 mb-8 animate-slide-down opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
               <Button className="bg-quant-teal hover:bg-quant-teal/80 text-quant-blue-dark font-medium px-8 py-6 text-lg button-glow">
-                Get Started
+                Browse Courses
               </Button>
               <Button variant="outline" className="border-quant-teal text-quant-teal hover:bg-quant-teal/10">
-                Watch Demo
+                Become Instructor
               </Button>
             </div>
             
             <div className="flex gap-8 animate-slide-down opacity-0" style={{ animationDelay: '1.1s', animationFillMode: 'forwards' }}>
               <div>
                 <p className="text-quant-teal text-4xl font-bold">
-                  <span id="percent-return">0</span>%
+                  <span id="percent-return">0</span>+
                 </p>
-                <p className="text-quant-gray">Average returns</p>
+                <p className="text-quant-gray">Active students</p>
               </div>
               <div>
                 <p className="text-quant-teal text-4xl font-bold">
                   <span id="traders-count">0</span>+
                 </p>
-                <p className="text-quant-gray">Traders trained</p>
+                <p className="text-quant-gray">Expert instructors</p>
               </div>
             </div>
           </div>
@@ -175,7 +175,7 @@ const HeroSection = () => {
           <div className="md:w-1/2 animate-slide-in-right opacity-0" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
             <div className="relative bg-quant-blue p-6 rounded-lg border border-quant-teal/20 shadow-[0_0_25px_rgba(100,255,218,0.15)]">
               <div className="absolute -top-5 -right-5 w-20 h-20 bg-quant-blue-light rounded-full flex items-center justify-center shadow-lg animate-pulse-subtle">
-                <ChartLine className="w-10 h-10 text-quant-teal" />
+                <Users className="w-10 h-10 text-quant-teal" />
               </div>
               
               <div className="h-72 relative overflow-hidden rounded">
@@ -255,12 +255,12 @@ const HeroSection = () => {
               <div className="mt-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-medium text-quant-white">Portfolio Performance</h3>
-                    <p className="text-quant-gray">May 2025</p>
+                    <h3 className="text-lg font-medium text-quant-white">Learning Growth</h3>
+                    <p className="text-quant-gray">Student Progress</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-quant-teal text-2xl font-bold">+23.7%</p>
-                    <p className="text-quant-gray">vs. Market +8.2%</p>
+                    <p className="text-quant-teal text-2xl font-bold">+95%</p>
+                    <p className="text-quant-gray">Completion Rate</p>
                   </div>
                 </div>
               </div>
