@@ -5,6 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -17,7 +28,9 @@ import {
   Users,
   Eye,
   DollarSign,
-  CreditCard
+  CreditCard,
+  Trash2,
+  Edit
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
@@ -102,6 +115,33 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteCourse = async (courseId: string) => {
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', courseId)
+        .eq('instructor_id', user?.id); // Ensure only the instructor can delete their own course
+
+      if (error) throw error;
+
+      // Update the local state
+      setCreatedCourses(prev => prev.filter(course => course.id !== courseId));
+      
+      toast({
+        title: "Success",
+        description: "Course deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete course",
+        variant: "destructive",
+      });
     }
   };
 
@@ -282,10 +322,12 @@ const Dashboard = () => {
                 createdCourses.slice(0, 3).map((course) => (
                   <div
                     key={course.id}
-                    className="flex items-center justify-between p-3 bg-quant-blue/10 rounded-lg cursor-pointer hover:bg-quant-blue/20 transition-colors"
-                    onClick={() => navigate(`/course/${course.id}`)}
+                    className="flex items-center justify-between p-3 bg-quant-blue/10 rounded-lg hover:bg-quant-blue/20 transition-colors"
                   >
-                    <div className="flex-1">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => navigate(`/course/${course.id}`)}
+                    >
                       <h4 className="font-medium text-quant-white">{course.title}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge 
@@ -299,8 +341,51 @@ const Dashboard = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <DollarSign className="w-5 h-5 text-quant-teal" />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/edit-course/${course.id}`);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            onClick={(e) => e.stopPropagation()}
+                            variant="outline"
+                            size="sm"
+                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-quant-blue-dark border-quant-blue">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-quant-white">
+                              Delete Course
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-quant-white/70">
+                              Are you sure you want to delete "{course.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="border-quant-blue text-quant-white hover:bg-quant-blue/20">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteCourse(course.id)}
+                              className="bg-red-500 text-white hover:bg-red-600"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))
