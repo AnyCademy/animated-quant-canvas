@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Play, Clock, Users, Star, CheckCircle, Lock, Edit } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import VideoPlayer from '@/components/VideoPlayer';
-import PaymentPage from '@/components/PaymentPage';
+import SplitPaymentPage from '@/components/SplitPaymentPage';
 
 interface Course {
   id: string;
@@ -228,7 +228,7 @@ const Course = () => {
   // Show payment page for paid courses
   if (showPayment && course) {
     return (
-      <PaymentPage
+      <SplitPaymentPage
         course={course}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentCancel={handlePaymentCancel}
@@ -333,14 +333,14 @@ const Course = () => {
 
           {/* Sidebar - Course Content */}
           <div className="lg:col-span-1">
-            <Card className="bg-quant-blue/20 border-quant-blue">
+            <Card className="bg-quant-blue/20 border-quant-blue text-quant-white">
               <CardHeader>
                 <CardTitle className="text-quant-white">Course Content</CardTitle>
                 <CardDescription className="text-quant-white/70">
                   {chapters.length} chapters • {chapters.reduce((total, chapter) => total + chapter.videos.length, 0)} videos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 text-quant-white">
                 {chapters.map((chapter) => (
                   <div key={chapter.id} className="space-y-2">
                     <h4 className="font-semibold text-quant-white">{chapter.title}</h4>
@@ -350,8 +350,8 @@ const Course = () => {
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                           enrollment || isInstructor
                             ? 'hover:bg-quant-blue/40 text-quant-white' 
-                            : 'text-quant-white/50'
-                        } ${selectedVideo?.id === video.id ? 'bg-quant-teal/20 border border-quant-teal' : ''}`}
+                            : 'text-quant-white/50 hover:bg-quant-blue/20'
+                        } ${selectedVideo?.id === video.id ? 'bg-quant-teal/20 border border-quant-teal text-quant-white' : ''}`}
                         onClick={() => {
                           if (enrollment || isInstructor) {
                             setSelectedVideo(video);
@@ -361,11 +361,15 @@ const Course = () => {
                         {enrollment || isInstructor ? (
                           <Play className="w-4 h-4 text-quant-teal" />
                         ) : (
-                          <Lock className="w-4 h-4" />
+                          <Lock className="w-4 h-4 text-quant-white/50" />
                         )}
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{video.title}</p>
-                          <p className="text-xs opacity-70">{formatDuration(video.duration)}</p>
+                          <p className={`text-sm font-medium ${
+                            enrollment || isInstructor ? 'text-quant-white' : 'text-quant-white/60'
+                          }`}>{video.title}</p>
+                          <p className={`text-xs ${
+                            enrollment || isInstructor ? 'text-quant-white/70' : 'text-quant-white/40'
+                          }`}>{formatDuration(video.duration)}</p>
                         </div>
                       </div>
                     ))}
