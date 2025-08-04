@@ -48,7 +48,13 @@ const Navbar = () => {
       )}
     >
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
+        <div className="flex items-center space-x-3">
+          <img 
+            src="/icon.svg" 
+            alt="AlgoQuant Logo" 
+            className="w-8 h-8 cursor-pointer"
+            onClick={() => navigate('/')}
+          />
           <span 
             className="text-2xl font-bold text-gradient cursor-pointer" 
             onClick={() => navigate('/')}

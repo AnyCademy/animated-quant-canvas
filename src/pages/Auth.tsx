@@ -81,7 +81,14 @@ const Auth = () => {
     <div className="min-h-screen bg-quant-blue-dark flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gradient mb-2">AlgoQuant</h1>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <img 
+              src="/icon.svg" 
+              alt="AlgoQuant Logo" 
+              className="w-12 h-12"
+            />
+            <h1 className="text-4xl font-bold text-gradient">AlgoQuant</h1>
+          </div>
           <h2 className="text-2xl font-bold text-quant-white mb-2">
             {isLogin ? 'Welcome Back' : 'Join AlgoQuant'}
           </h2>

@@ -46,7 +46,14 @@ const Index = () => {
           <div className="inline-block mb-6">
             <div className="w-20 h-20 border-4 border-t-quant-teal border-quant-blue rounded-full animate-spin"></div>
           </div>
-          <h2 className="text-3xl font-bold text-gradient">AlgoQuant</h2>
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <img 
+              src="/icon.svg" 
+              alt="AlgoQuant Logo" 
+              className="w-10 h-10"
+            />
+            <h2 className="text-3xl font-bold text-gradient">AlgoQuant</h2>
+          </div>
           {user && (
             <p className="text-quant-white mt-2">Welcome back, {user.email}!</p>
           )}
