@@ -29,6 +29,8 @@ import {
   cancelPayoutRequest,
   createBatchPayout,
   getInstructorBankAccount,
+  setBankVerificationStatus,
+  listInstructorBankAccounts,
   type PayoutBatch,
   type AdminPayoutSummary
 } from '@/lib/payoutManager';
@@ -52,6 +54,8 @@ const AdminPayouts: React.FC = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<PayoutBatch | null>(null);
   const [bankAccount, setBankAccount] = useState<any>(null);
+  const [allBankAccounts, setAllBankAccounts] = useState<any[]>([]);
+  const [verifying, setVerifying] = useState(false);
 
   // Form states
   const [batchReference, setBatchReference] = useState('');
@@ -65,13 +69,15 @@ const AdminPayouts: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [summaryData, pendingData] = await Promise.all([
+      const [summaryData, pendingData, accounts] = await Promise.all([
         getAdminPayoutSummary(),
-        getPendingPayoutRequests()
+        getPendingPayoutRequests(),
+        listInstructorBankAccounts(),
       ]);
       
       setSummary(summaryData);
       setPendingPayouts(pendingData);
+      setAllBankAccounts(accounts);
     } catch (error) {
       console.error('Error loading admin payout data:', error);
     } finally {
@@ -92,6 +98,27 @@ const AdminPayouts: React.FC = () => {
     const account = await getInstructorBankAccount(payout.instructor_id);
     setBankAccount(account);
     setViewDialogOpen(true);
+  };
+
+  const handleToggleVerification = async () => {
+    if (!selectedPayout || !bankAccount) return;
+    try {
+      setVerifying(true);
+      const next = !bankAccount.is_verified;
+      const ok = await setBankVerificationStatus(selectedPayout.instructor_id, next);
+      if (ok) {
+        const refreshed = await getInstructorBankAccount(selectedPayout.instructor_id);
+        setBankAccount(refreshed);
+        alert(`Bank account ${next ? 'verified' : 'unverified'} successfully.`);
+      } else {
+        alert('Failed to update verification status');
+      }
+    } catch (e) {
+      console.error('Verification toggle error:', e);
+      alert('Error updating verification status');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const handleApprovePayout = async () => {
@@ -283,10 +310,11 @@ const AdminPayouts: React.FC = () => {
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending">Pending Requests</TabsTrigger>
           <TabsTrigger value="processing">Processing</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="bank-accounts">Bank Accounts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-6">
@@ -503,6 +531,80 @@ const AdminPayouts: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="bank-accounts" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Instructor Bank Accounts</CardTitle>
+                <CardDescription>Review and verify instructor payout bank accounts</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allBankAccounts.map((acc) => (
+                  <div key={acc.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-muted-foreground">Instructor</span>
+                        <code className="text-xs">{acc.instructor_id}</code>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                          <Label className="text-sm font-medium">Bank</Label>
+                          <p>{acc.bank_name} {acc.bank_code ? `(${acc.bank_code})` : ''}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Account</Label>
+                          <p className="font-mono">{acc.account_number}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Holder</Label>
+                          <p>{acc.account_holder_name}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Status</Label>
+                          <Badge variant={acc.is_verified ? 'default' : 'secondary'}>
+                            {acc.is_verified ? 'Verified' : 'Pending'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <Button
+                        variant={acc.is_verified ? 'outline' : 'default'}
+                        disabled={verifying}
+                        onClick={async () => {
+                          try {
+                            setVerifying(true);
+                            const ok = await setBankVerificationStatus(acc.instructor_id, !acc.is_verified);
+                            if (ok) {
+                              // refresh
+                              const accounts = await listInstructorBankAccounts();
+                              setAllBankAccounts(accounts);
+                            } else {
+                              alert('Failed to update verification');
+                            }
+                          } finally {
+                            setVerifying(false);
+                          }
+                        }}
+                      >
+                        {verifying ? 'Updating...' : acc.is_verified ? 'Mark Unverified' : 'Mark Verified'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                {allBankAccounts.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No bank accounts found</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* View Payout Details Dialog */}
@@ -561,6 +663,15 @@ const AdminPayouts: React.FC = () => {
                       <Badge variant={bankAccount.is_verified ? "default" : "secondary"}>
                         {bankAccount.is_verified ? "Verified" : "Pending"}
                       </Badge>
+                    </div>
+                    <div className="col-span-2">
+                      <Button
+                        variant={bankAccount.is_verified ? 'outline' : 'default'}
+                        onClick={handleToggleVerification}
+                        disabled={verifying}
+                      >
+                        {verifying ? 'Updating...' : bankAccount.is_verified ? 'Mark as Unverified' : 'Mark as Verified'}
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,23 +65,54 @@ const BankAccountManagement: React.FC = () => {
   const loadBankAccount = async () => {
     try {
       setLoading(true);
-      
-      // For now, use localStorage until database tables are created
-      const storedAccount = localStorage.getItem(`bank_account_${user?.id}`);
-      if (storedAccount) {
-        const account = JSON.parse(storedAccount);
-        setBankAccount(account);
+      if (!user?.id) {
+        setBankAccount(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('instructor_bank_accounts')
+        .select('*')
+        .eq('instructor_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading bank account:', error.message);
+        setBankAccount(null);
+        return;
+      }
+
+      if (data) {
+        setBankAccount(data as BankAccount);
         setFormData({
-          bank_name: account.bank_name,
-          account_number: account.account_number,
-          account_holder_name: account.account_holder_name,
-          bank_code: account.bank_code || ''
+          bank_name: data.bank_name || '',
+          account_number: data.account_number || '',
+          account_holder_name: data.account_holder_name || '',
+          bank_code: data.bank_code || ''
         });
+      } else {
+        setBankAccount(null);
       }
     } catch (error) {
       console.error('Error loading bank account:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    if (bankAccount) {
+      setFormData({
+        bank_name: bankAccount.bank_name || '',
+        account_number: bankAccount.account_number || '',
+        account_holder_name: bankAccount.account_holder_name || '',
+        bank_code: bankAccount.bank_code || ''
+      });
     }
   };
 
@@ -99,45 +131,33 @@ const BankAccountManagement: React.FC = () => {
         return;
       }
 
-      // Mock save to localStorage until database is ready
-      const accountData: BankAccount = {
-        id: bankAccount?.id || Date.now().toString(),
-        bank_name: formData.bank_name,
-        account_number: formData.account_number,
-        account_holder_name: formData.account_holder_name,
-        bank_code: formData.bank_code,
-        is_verified: false, // Will need admin verification
-        is_active: true
+      if (!user?.id) return;
+
+      const payload = {
+        instructor_id: user.id,
+        ...formData,
+        is_verified: false,
+        updated_at: new Date().toISOString()
       };
 
-      localStorage.setItem(`bank_account_${user?.id}`, JSON.stringify(accountData));
-      setBankAccount(accountData);
-      setIsEditing(false);
-      
-      alert('Bank account information saved successfully! Verification will be completed within 1-2 business days.');
+      const { error } = await supabase
+        .from('instructor_bank_accounts')
+        .upsert(payload, { onConflict: 'instructor_id' });
 
+      if (error) {
+        console.error('DB upsert failed:', error.message);
+        return;
+      }
+
+      await loadBankAccount();
+      setIsEditing(false);
+      alert('Bank account saved. Verification will be completed within 1-2 business days.');
     } catch (error) {
       console.error('Error saving bank account:', error);
       alert('Error saving bank account information');
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    if (bankAccount) {
-      setFormData({
-        bank_name: bankAccount.bank_name,
-        account_number: bankAccount.account_number,
-        account_holder_name: bankAccount.account_holder_name,
-        bank_code: bankAccount.bank_code || ''
-      });
-    }
-    setIsEditing(false);
   };
 
   if (loading) {

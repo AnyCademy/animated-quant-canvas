@@ -18,7 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { getInstructorEarnings, getInstructorCoursesForEarnings } from '@/lib/revenueSplit';
-import { createPayoutRequest } from '@/lib/payoutManager';
+import { createPayoutRequest, getInstructorBankAccount } from '@/lib/payoutManager';
 import BankAccountManagement from '@/components/BankAccountManagement';
 
 interface EarningsData {
@@ -57,16 +57,10 @@ const InstructorEarnings: React.FC = () => {
     }
   }, [user?.id]);
 
-  const checkBankAccountStatus = () => {
+  const checkBankAccountStatus = async () => {
     if (!user?.id) return;
-    
-    const bankAccountData = localStorage.getItem(`bank_account_${user.id}`);
-    if (bankAccountData) {
-      const bankAccount = JSON.parse(bankAccountData);
-      setHasBankAccount(bankAccount.is_verified || false);
-    } else {
-      setHasBankAccount(false);
-    }
+    const account = await getInstructorBankAccount(user.id);
+    setHasBankAccount(!!account && !!account.is_verified);
   };
 
   const loadEarningsData = async () => {
@@ -108,9 +102,9 @@ const InstructorEarnings: React.FC = () => {
       return;
     }
 
-    // Ensure bank account exists and is verified
-    const bankAccountData = localStorage.getItem(`bank_account_${user.id}`);
-    if (!bankAccountData) {
+    // Ensure bank account exists and is verified (DB only)
+    const account = await getInstructorBankAccount(user.id);
+    if (!account) {
       const goSetup = confirm('No bank account found. You need to set up a bank account in Payout Settings. Go there now?');
       if (goSetup) {
         const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
@@ -118,21 +112,12 @@ const InstructorEarnings: React.FC = () => {
       }
       return;
     }
-    try {
-      const bankAccount = JSON.parse(bankAccountData);
-      if (!bankAccount.is_verified) {
-        const goVerify = confirm('Your bank account is not verified yet. Please complete verification in Payout Settings. Go there now?');
-        if (goVerify) {
-          const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
-          payoutTab?.click();
-        }
-        return;
+    if (!account.is_verified) {
+      const goVerify = confirm('Your bank account is not verified yet. Please complete verification in Payout Settings. Go there now?');
+      if (goVerify) {
+        const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
+        payoutTab?.click();
       }
-    } catch (e) {
-      console.error('Invalid bank account data in storage', e);
-      alert('Bank account data is invalid. Please re-enter your bank details in Payout Settings.');
-      const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
-      payoutTab?.click();
       return;
     }
 
@@ -151,8 +136,8 @@ const InstructorEarnings: React.FC = () => {
       if (success) {
         alert('Payout request submitted successfully! You will receive an email confirmation shortly.');
         // Reload earnings data to reflect the new status
-        await loadEarningsData();
-        checkBankAccountStatus();
+  await loadEarningsData();
+  await checkBankAccountStatus();
       } else {
         alert('Failed to submit payout request. Please check your bank account settings or try again later.');
       }
