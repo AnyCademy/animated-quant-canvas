@@ -14,7 +14,8 @@ import Course from "./pages/Course";
 import CreateCourse from "./pages/CreateCourse";
 import EditCourse from "./pages/EditCourse";
 import PaymentResult from "./pages/PaymentResult";
-import InstructorPaymentSettings from "./pages/InstructorPaymentSettings";
+import InstructorEarnings from "./pages/InstructorEarnings";
+import AdminPayouts from "./pages/AdminPayouts";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -68,9 +69,14 @@ const App = () => (
                 <EditCourse />
               </ProtectedRoute>
             } />
-            <Route path="/instructor/payment-settings" element={
+            <Route path="/instructor/earnings" element={
               <ProtectedRoute>
-                <InstructorPaymentSettings />
+                <InstructorEarnings />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/payouts" element={
+              <ProtectedRoute>
+                <AdminPayouts />
               </ProtectedRoute>
             } />
             <Route path="/payment/finish" element={<PaymentResult />} />

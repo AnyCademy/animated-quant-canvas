@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, BarChart3, BookOpen, LogIn, UserPlus } from 'lucide-react';
+import { LogOut, User, BarChart3, BookOpen, LogIn, UserPlus, DollarSign, Settings } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -38,6 +38,14 @@ const Navbar = () => {
 
   const handleCoursesClick = () => {
     navigate('/courses');
+  };
+
+  const handleEarningsClick = () => {
+    navigate('/instructor/earnings');
+  };
+
+  const handleAdminPayoutsClick = () => {
+    navigate('/admin/payouts');
   };
 
   return (
@@ -84,6 +92,20 @@ const Navbar = () => {
                 <BarChart3 className="w-4 h-4" />
                 Dashboard
               </button>
+              <button 
+                onClick={handleEarningsClick}
+                className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+              >
+                <DollarSign className="w-4 h-4" />
+                Earnings
+              </button>
+              <button 
+                onClick={handleAdminPayoutsClick}
+                className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+              >
+                <Settings className="w-4 h-4" />
+                Admin
+              </button>
             </>
           )}
         </div>
@@ -109,6 +131,20 @@ const Navbar = () => {
                 onClick={handleDashboardClick}
               >
                 <BarChart3 className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+                onClick={handleEarningsClick}
+              >
+                <DollarSign className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+                onClick={handleAdminPayoutsClick}
+              >
+                <Settings className="w-4 h-4" />
               </Button>
               
               <Button 

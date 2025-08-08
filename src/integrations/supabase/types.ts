@@ -1,6 +1,3 @@
-Need to install the following packages:
-supabase@2.33.7
-Ok to proceed? (y) 
 export type Json =
   | string
   | number
@@ -120,6 +117,45 @@ export type Database = {
         }
         Relationships: []
       }
+      instructor_bank_accounts: {
+        Row: {
+          account_holder_name: string
+          account_number: string
+          bank_code: string | null
+          bank_name: string
+          created_at: string
+          id: string
+          instructor_id: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          account_holder_name: string
+          account_number: string
+          bank_code?: string | null
+          bank_name: string
+          created_at?: string
+          id?: string
+          instructor_id?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          account_holder_name?: string
+          account_number?: string
+          bank_code?: string | null
+          bank_name?: string
+          created_at?: string
+          id?: string
+          instructor_id?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instructor_payment_settings: {
         Row: {
           created_at: string
@@ -129,6 +165,7 @@ export type Database = {
           is_production: boolean | null
           midtrans_client_key: string | null
           midtrans_server_key: string | null
+          migration_status: string | null
           updated_at: string
         }
         Insert: {
@@ -139,6 +176,7 @@ export type Database = {
           is_production?: boolean | null
           midtrans_client_key?: string | null
           midtrans_server_key?: string | null
+          migration_status?: string | null
           updated_at?: string
         }
         Update: {
@@ -149,6 +187,7 @@ export type Database = {
           is_production?: boolean | null
           midtrans_client_key?: string | null
           midtrans_server_key?: string | null
+          migration_status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -160,10 +199,14 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          instructor_share: number | null
           midtrans_order_id: string
           midtrans_transaction_id: string | null
           paid_at: string | null
           payment_method: string | null
+          platform_fee: number | null
+          platform_fee_percentage: number | null
+          split_payment_enabled: boolean | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
           user_id: string
@@ -174,10 +217,14 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          instructor_share?: number | null
           midtrans_order_id: string
           midtrans_transaction_id?: string | null
           paid_at?: string | null
           payment_method?: string | null
+          platform_fee?: number | null
+          platform_fee_percentage?: number | null
+          split_payment_enabled?: boolean | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
           user_id: string
@@ -188,10 +235,14 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          instructor_share?: number | null
           midtrans_order_id?: string
           midtrans_transaction_id?: string | null
           paid_at?: string | null
           payment_method?: string | null
+          platform_fee?: number | null
+          platform_fee_percentage?: number | null
+          split_payment_enabled?: boolean | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
           user_id?: string
@@ -205,6 +256,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payout_batch_items: {
+        Row: {
+          amount: number
+          batch_id: string | null
+          created_at: string
+          id: string
+          revenue_split_id: string | null
+        }
+        Insert: {
+          amount: number
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          revenue_split_id?: string | null
+        }
+        Update: {
+          amount?: number
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          revenue_split_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "payout_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_batch_items_revenue_split_id_fkey"
+            columns: ["revenue_split_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_splits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_batches: {
+        Row: {
+          batch_reference: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          instructor_id: string | null
+          notes: string | null
+          payout_method: string | null
+          processed_at: string | null
+          scheduled_date: string | null
+          status: string | null
+          total_amount: number
+          transaction_count: number
+        }
+        Insert: {
+          batch_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructor_id?: string | null
+          notes?: string | null
+          payout_method?: string | null
+          processed_at?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          total_amount: number
+          transaction_count?: number
+        }
+        Update: {
+          batch_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructor_id?: string | null
+          notes?: string | null
+          payout_method?: string | null
+          processed_at?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          total_amount?: number
+          transaction_count?: number
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -229,6 +391,63 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      revenue_splits: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          instructor_id: string | null
+          instructor_share: number
+          payment_id: string | null
+          platform_fee_amount: number
+          platform_fee_percentage: number
+          status: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          instructor_id?: string | null
+          instructor_share: number
+          payment_id?: string | null
+          platform_fee_amount: number
+          platform_fee_percentage: number
+          status?: string | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          instructor_id?: string | null
+          instructor_share?: number
+          payment_id?: string | null
+          platform_fee_amount?: number
+          platform_fee_percentage?: number
+          status?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_splits_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_splits_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_dashboard_data: {
         Row: {
@@ -350,10 +569,52 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      instructor_earnings_view: {
+        Row: {
+          avg_fee_percentage: number | null
+          course_id: string | null
+          course_title: string | null
+          instructor_id: string | null
+          total_course_revenue: number | null
+          total_instructor_earnings: number | null
+          total_platform_fees_paid: number | null
+          total_sales: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_earnings_view: {
+        Row: {
+          avg_fee_percentage: number | null
+          date: string | null
+          total_instructor_payments: number | null
+          total_platform_fees: number | null
+          total_revenue: number | null
+          total_transactions: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      calculate_split_payment: {
+        Args: {
+          course_amount: number
+          fee_percentage?: number
+          fixed_fee?: number
+        }
+        Returns: {
+          total_amount: number
+          platform_fee: number
+          instructor_share: number
+        }[]
+      }
     }
     Enums: {
       course_status: "draft" | "published" | "archived"

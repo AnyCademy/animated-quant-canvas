@@ -12,11 +12,9 @@ import {
   loadSnapScript, 
   openSnapPayment, 
   updatePaymentStatus,
-  getInstructorPaymentSettings,
-  MidtransPaymentData,
-  InstructorPaymentSettings
-} from '@/lib/midtrans';
-import { logPaymentDiagnostics } from '@/utils/paymentDiagnostics';
+  MidtransPaymentData
+} from '@/lib/platformMidtrans';
+import { diagnosePlatformPaymentIssues } from '@/utils/platformPaymentDiagnostics';
 
 interface PaymentPageProps {
   course: {
@@ -60,39 +58,28 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
     setProcessing(true);
 
     try {
-      // Run diagnostic check first
-      await logPaymentDiagnostics(course.instructor_id);
+      // Run platform payment diagnostic check
+      const diagnostics = await diagnosePlatformPaymentIssues();
       
-      // Get instructor's payment settings
-      const instructorSettings = await getInstructorPaymentSettings(course.instructor_id);
-      
-      if (!instructorSettings) {
+      if (!diagnostics.hasPlatformSettings || !diagnostics.isActive) {
         toast({
           title: "Payment Unavailable",
-          description: "This instructor hasn't configured their payment settings yet or the payment gateway is not active. Please contact the instructor.",
+          description: "Platform payment processing is not configured. Please contact support.",
           variant: "destructive",
         });
         setProcessing(false);
         return;
       }
 
-      // Additional validation for payment settings
-      if (!instructorSettings.midtrans_client_key || !instructorSettings.midtrans_server_key) {
+      if (diagnostics.issues.length > 0) {
         toast({
           title: "Payment Configuration Error",
-          description: "The instructor's payment configuration is incomplete. Please contact the instructor.",
+          description: `Payment setup issues detected: ${diagnostics.issues[0]}`,
           variant: "destructive",
         });
         setProcessing(false);
         return;
       }
-
-      console.log('Instructor payment settings found:', {
-        hasClientKey: !!instructorSettings.midtrans_client_key,
-        hasServerKey: !!instructorSettings.midtrans_server_key,
-        isProduction: instructorSettings.is_production,
-        isActive: instructorSettings.is_active
-      });
 
       // Create payment record in database
       // Generate shorter order ID to comply with Midtrans limits (max 50 chars)
@@ -139,11 +126,11 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         }],
       };
 
-      // Load Snap script with instructor's credentials
-      await loadSnapScript(instructorSettings);
+      // Load Snap script with platform credentials
+      await loadSnapScript();
 
-      // Create Snap token with instructor's credentials
-      const snapToken = await createSnapToken(paymentData, instructorSettings);
+      // Create Snap token with platform credentials
+      const snapToken = await createSnapToken(paymentData);
 
       // Open payment modal
       const result = await openSnapPayment(snapToken);
