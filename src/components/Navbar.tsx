@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/use-user-role';
 import { LogOut, User, BarChart3, BookOpen, LogIn, UserPlus, DollarSign, Settings } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -72,10 +74,6 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex space-x-8">
-          <a href="#features" className="text-quant-white hover:text-quant-teal transition-colors">Features</a>
-          <a href="#curriculum" className="text-quant-white hover:text-quant-teal transition-colors">Categories</a>
-          <a href="#testimonials" className="text-quant-white hover:text-quant-teal transition-colors">Reviews</a>
-          <a href="#pricing" className="text-quant-white hover:text-quant-teal transition-colors">Pricing</a>
           {user && (
             <>
               <button 
@@ -99,13 +97,15 @@ const Navbar = () => {
                 <DollarSign className="w-4 h-4" />
                 Earnings
               </button>
-              <button 
-                onClick={handleAdminPayoutsClick}
-                className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
-              >
-                <Settings className="w-4 h-4" />
-                Admin
-              </button>
+              {isAdmin() && (
+                <button 
+                  onClick={handleAdminPayoutsClick}
+                  className="text-quant-white hover:text-quant-teal transition-colors flex items-center gap-1"
+                >
+                  <Settings className="w-4 h-4" />
+                  Admin
+                </button>
+              )}
             </>
           )}
         </div>
@@ -139,13 +139,15 @@ const Navbar = () => {
               >
                 <DollarSign className="w-4 h-4" />
               </Button>
-              <Button 
-                variant="outline" 
-                className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
-                onClick={handleAdminPayoutsClick}
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
+              {isAdmin() && (
+                <Button 
+                  variant="outline" 
+                  className="border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark md:hidden"
+                  onClick={handleAdminPayoutsClick}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              )}
               
               <Button 
                 variant="default" 

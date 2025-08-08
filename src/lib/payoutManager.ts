@@ -46,29 +46,20 @@ export const createPayoutRequest = async (
   try {
     console.log(`Creating payout request for instructor ${instructorId}: ${requestedAmount}`);
 
-    // Check if instructor already has a pending request using direct SQL
-    const { data: existingRequests, error: checkError } = await supabase.rpc('check_pending_payout', {
-      instructor_id: instructorId
-    });
+    // For now, store in localStorage until database tables are created
+    const existingRequests = JSON.parse(localStorage.getItem('payout_requests') || '[]');
+    
+    // Check if instructor already has a pending request
+    const existingRequest = existingRequests.find(
+      (req: any) => req.instructor_id === instructorId && req.status === 'pending'
+    );
 
-    if (checkError) {
-      console.log('RPC not available, using direct query');
-      // Fallback to checking localStorage if RPC fails
-      const existingLocalRequests = JSON.parse(localStorage.getItem('payout_requests') || '[]');
-      const existingRequest = existingLocalRequests.find(
-        (req: any) => req.instructor_id === instructorId && req.status === 'pending'
-      );
-
-      if (existingRequest) {
-        console.log('Instructor already has a pending payout request');
-        return false;
-      }
-    } else if (existingRequests && existingRequests.length > 0) {
+    if (existingRequest) {
       console.log('Instructor already has a pending payout request');
       return false;
     }
 
-    // Get bank account info from localStorage (until bank account table is accessible)
+    // Get bank account info
     const bankAccountData = localStorage.getItem(`bank_account_${instructorId}`);
     if (!bankAccountData) {
       console.log('No bank account found for instructor');
@@ -81,33 +72,21 @@ export const createPayoutRequest = async (
       return false;
     }
 
-    // Create payout request in database
-    const payoutRequest = {
+    // Create payout request
+    const payoutRequest: PayoutBatch = {
+      id: Date.now().toString(),
       instructor_id: instructorId,
       total_amount: requestedAmount,
-      transaction_count: 1,
+      transaction_count: 1, // Will be calculated from revenue splits
       payout_method: 'manual_transfer',
       status: 'pending',
-      scheduled_date: new Date().toISOString().split('T')[0],
-      notes: `Payout request for ${requestedAmount}`
+      scheduled_date: new Date().toISOString(),
+      notes: `Payout request for ${requestedAmount}`,
+      created_at: new Date().toISOString()
     };
 
-    // Try to insert into actual database first
-    const { error: insertError } = await supabase
-      .from('payout_batches' as any)
-      .insert(payoutRequest);
-
-    if (insertError) {
-      console.log('Database insert failed, using localStorage fallback:', insertError);
-      // Fallback to localStorage
-      const existingRequests = JSON.parse(localStorage.getItem('payout_requests') || '[]');
-      existingRequests.push({
-        ...payoutRequest,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
-      });
-      localStorage.setItem('payout_requests', JSON.stringify(existingRequests));
-    }
+    existingRequests.push(payoutRequest);
+    localStorage.setItem('payout_requests', JSON.stringify(existingRequests));
 
     console.log('Payout request created successfully');
     return true;

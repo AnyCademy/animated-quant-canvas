@@ -156,42 +156,6 @@ export type Database = {
         }
         Relationships: []
       }
-      instructor_payment_settings: {
-        Row: {
-          created_at: string
-          id: string
-          instructor_id: string
-          is_active: boolean | null
-          is_production: boolean | null
-          midtrans_client_key: string | null
-          midtrans_server_key: string | null
-          migration_status: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          instructor_id: string
-          is_active?: boolean | null
-          is_production?: boolean | null
-          midtrans_client_key?: string | null
-          midtrans_server_key?: string | null
-          migration_status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          instructor_id?: string
-          is_active?: boolean | null
-          is_production?: boolean | null
-          midtrans_client_key?: string | null
-          midtrans_server_key?: string | null
-          migration_status?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       payments: {
         Row: {
           amount: number

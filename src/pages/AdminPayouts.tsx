@@ -23,11 +23,15 @@ import {
 } from 'lucide-react';
 import {
   getAdminPayoutSummary,
-  getPendingPayouts,
-  updatePayoutStatus,
-  getBankAccount,
-  type PayoutBatchData
-} from '@/lib/databaseHelpers';
+  getPendingPayoutRequests,
+  approvePayoutRequest,
+  completePayoutRequest,
+  cancelPayoutRequest,
+  createBatchPayout,
+  getInstructorBankAccount,
+  type PayoutBatch,
+  type AdminPayoutSummary
+} from '@/lib/payoutManager';
 
 const AdminPayouts: React.FC = () => {
   const [summary, setSummary] = useState<AdminPayoutSummary>({
@@ -37,7 +41,7 @@ const AdminPayouts: React.FC = () => {
     completed_this_month: 0,
     instructors_awaiting_payout: 0
   });
-  const [pendingPayouts, setPendingPayouts] = useState<any[]>([]);
+  const [pendingPayouts, setPendingPayouts] = useState<PayoutBatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayouts, setSelectedPayouts] = useState<string[]>([]);
   const [processingAction, setProcessingAction] = useState<string | null>(null);
@@ -46,7 +50,7 @@ const AdminPayouts: React.FC = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [selectedPayout, setSelectedPayout] = useState<any>(null);
+  const [selectedPayout, setSelectedPayout] = useState<PayoutBatch | null>(null);
   const [bankAccount, setBankAccount] = useState<any>(null);
 
   // Form states

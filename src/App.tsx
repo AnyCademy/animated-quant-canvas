@@ -16,6 +16,8 @@ import EditCourse from "./pages/EditCourse";
 import PaymentResult from "./pages/PaymentResult";
 import InstructorEarnings from "./pages/InstructorEarnings";
 import AdminPayouts from "./pages/AdminPayouts";
+import UserManagement from "./pages/UserManagement";
+import AdminRoute from "./components/AdminRoute";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -76,7 +78,16 @@ const App = () => (
             } />
             <Route path="/admin/payouts" element={
               <ProtectedRoute>
-                <AdminPayouts />
+                <AdminRoute>
+                  <AdminPayouts />
+                </AdminRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute>
+                <AdminRoute requireSuperAdmin={true}>
+                  <UserManagement />
+                </AdminRoute>
               </ProtectedRoute>
             } />
             <Route path="/payment/finish" element={<PaymentResult />} />

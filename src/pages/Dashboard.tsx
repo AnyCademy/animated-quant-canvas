@@ -503,16 +503,6 @@ const Dashboard = () => {
               </div>
             </Button>
 
-            <Button
-              onClick={() => navigate('/instructor/payment-settings')}
-              variant="outline"
-              className="h-16 border-quant-teal text-quant-teal hover:bg-quant-teal/10"
-            >
-              <div className="text-center">
-                <CreditCard className="w-6 h-6 mx-auto mb-1" />
-                <span>Payment Settings</span>
-              </div>
-            </Button>
 
             <Button
               onClick={() => {

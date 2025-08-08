@@ -14,9 +14,12 @@ import {
   Download,
   Eye,
   Clock,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { getInstructorEarnings, getInstructorCoursesForEarnings } from '@/lib/revenueSplit';
+import { createPayoutRequest } from '@/lib/payoutManager';
+import BankAccountManagement from '@/components/BankAccountManagement';
 
 interface EarningsData {
   total_earnings: number;
@@ -44,13 +47,27 @@ const InstructorEarnings: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [requestingPayout, setRequestingPayout] = useState(false);
+  const [hasBankAccount, setHasBankAccount] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
       loadEarningsData();
       loadCoursesData();
+      checkBankAccountStatus();
     }
   }, [user?.id]);
+
+  const checkBankAccountStatus = () => {
+    if (!user?.id) return;
+    
+    const bankAccountData = localStorage.getItem(`bank_account_${user.id}`);
+    if (bankAccountData) {
+      const bankAccount = JSON.parse(bankAccountData);
+      setHasBankAccount(bankAccount.is_verified || false);
+    } else {
+      setHasBankAccount(false);
+    }
+  };
 
   const loadEarningsData = async () => {
     if (!user?.id) return;
@@ -86,19 +103,64 @@ const InstructorEarnings: React.FC = () => {
   };
 
   const handleRequestPayout = async () => {
+    if (!user?.id) {
+      alert('User not authenticated');
+      return;
+    }
+
+    // Ensure bank account exists and is verified
+    const bankAccountData = localStorage.getItem(`bank_account_${user.id}`);
+    if (!bankAccountData) {
+      const goSetup = confirm('No bank account found. You need to set up a bank account in Payout Settings. Go there now?');
+      if (goSetup) {
+        const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
+        payoutTab?.click();
+      }
+      return;
+    }
+    try {
+      const bankAccount = JSON.parse(bankAccountData);
+      if (!bankAccount.is_verified) {
+        const goVerify = confirm('Your bank account is not verified yet. Please complete verification in Payout Settings. Go there now?');
+        if (goVerify) {
+          const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
+          payoutTab?.click();
+        }
+        return;
+      }
+    } catch (e) {
+      console.error('Invalid bank account data in storage', e);
+      alert('Bank account data is invalid. Please re-enter your bank details in Payout Settings.');
+      const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
+      payoutTab?.click();
+      return;
+    }
+
+    // Check minimum payout amount
+    if (earnings.pending_earnings < 50000) {
+      alert(`Minimum payout amount is ${formatCurrency(50000)}. You currently have ${formatCurrency(earnings.pending_earnings)} pending. You need ${formatCurrency(50000 - earnings.pending_earnings)} more to request a payout.`);
+      return;
+    }
+
     setRequestingPayout(true);
     try {
-      // This will be implemented when the payout system is ready
       console.log('Requesting payout for amount:', earnings.pending_earnings);
       
-      // Mock success for demo
-      setTimeout(() => {
+      const success = await createPayoutRequest(user.id, earnings.pending_earnings);
+      
+      if (success) {
         alert('Payout request submitted successfully! You will receive an email confirmation shortly.');
-        setRequestingPayout(false);
-      }, 2000);
+        // Reload earnings data to reflect the new status
+        await loadEarningsData();
+        checkBankAccountStatus();
+      } else {
+        alert('Failed to submit payout request. Please check your bank account settings or try again later.');
+      }
       
     } catch (error) {
       console.error('Error requesting payout:', error);
+      alert('An error occurred while submitting your payout request. Please try again.');
+    } finally {
       setRequestingPayout(false);
     }
   };
@@ -212,41 +274,57 @@ const InstructorEarnings: React.FC = () => {
       </div>
 
       {/* Payout Request Section */}
-      {earnings.pending_earnings >= 50000 && (
-        <Alert className="mb-6 border-green-200 bg-green-50">
-          <CreditCard className="h-4 w-4" />
+      {!hasBankAccount && (
+        <Alert className="mb-6 bg-card">
+          <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>
-              You have {formatCurrency(earnings.pending_earnings)} available for payout.
-              Minimum payout is {formatCurrency(50000)}.
+              You need to set up a verified bank account before you can request payouts.
+              {` `}
+              You have {formatCurrency(earnings.pending_earnings)} pending earnings.
             </span>
             <Button 
-              onClick={handleRequestPayout}
-              disabled={requestingPayout}
-              className="ml-4"
+              variant="outline"
+              className="ml-4 border-quant-teal text-quant-teal hover:bg-quant-teal hover:text-quant-blue-dark"
+              onClick={() => {
+                // Scroll to payout settings tab
+                const payoutTab = document.querySelector('[value="payout"]') as HTMLElement;
+                payoutTab?.click();
+              }}
             >
-              {requestingPayout ? 'Processing...' : 'Request Payout'}
+              Set Up Bank Account
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
-      {earnings.pending_earnings < 50000 && earnings.pending_earnings > 0 && (
-        <Alert className="mb-6">
-          <AlertDescription>
-            You have {formatCurrency(earnings.pending_earnings)} pending. 
-            Minimum payout amount is {formatCurrency(50000)}.
-            You need {formatCurrency(50000 - earnings.pending_earnings)} more to request a payout.
-          </AlertDescription>
-        </Alert>
-      )}
+      <Alert className={`mb-6 ${earnings.pending_earnings >= 50000 ? 'bg-card' : ' bg-card'}`}>
+        <CreditCard className="h-4 w-4" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            You have {formatCurrency(earnings.pending_earnings)} available for payout.
+            {earnings.pending_earnings < 50000 && (
+              <> Minimum payout is {formatCurrency(50000)}.</>
+            )}
+          </span>
+          <Button 
+            variant="default"
+            onClick={handleRequestPayout}
+            disabled={requestingPayout}
+            className="ml-4 bg-quant-teal text-quant-blue-dark hover:bg-quant-teal/80 disabled:opacity-60 disabled:cursor-not-allowed button-glow"
+          >
+            {requestingPayout ? 'Processing...' : 'Request Payout'}
+          </Button>
+        </AlertDescription>
+      </Alert>
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="courses">Course Performance</TabsTrigger>
+          <TabsTrigger value="payout">Payout Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -392,6 +470,20 @@ const InstructorEarnings: React.FC = () => {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payout" className="space-y-6">
+          <Card className="bg-transparent border-transparent shadow-none">
+            <CardHeader>
+              <CardTitle>Payout Settings</CardTitle>
+              <CardDescription>
+                Manage your bank account and payout preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BankAccountManagement />
             </CardContent>
           </Card>
         </TabsContent>
